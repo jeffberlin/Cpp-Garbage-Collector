@@ -108,15 +108,31 @@ Pointer<T,size>::Pointer(T *t){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
+    addr = t;
+    if (size > 0) {
+        arraySize = size;
+        isArray = true;
+    }
+    
+    PtrDetails<T> p = PtrDetails<T>(addr, arraySize)
+    p.refcount++;
+    refContainer.push_back(p);
 
 }
+
 // Copy constructor.
 template< class T, int size>
 Pointer<T,size>::Pointer(const Pointer &ob){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
-
+    typename std::list<PtrDetails<T> >::iterator p;
+    p = findPtrInfo(ob.addr);
+    p->refcount++;
+    if (ob.isArray)
+    {
+        p->isArray = true;
+    }
 }
 
 // Destructor for Pointer.
@@ -125,6 +141,12 @@ Pointer<T, size>::~Pointer(){
     
     // TODO: Implement Pointer destructor
     // Lab: New and Delete Project Lab
+    typename std::list<PtrDetails<T> >iterator p;
+    p = findPtrInfo(addr);
+    if (p->refcount) {
+        p->refcount--;
+    }
+    collect();
 }
 
 // Collect garbage. Returns true if at least
@@ -135,7 +157,28 @@ bool Pointer<T, size>::collect(){
     // TODO: Implement collect function
     // LAB: New and Delete Project Lab
     // Note: collect() will be called in the destructor
-    return false;
+    bool memfreed = false;
+    typename std::list<PtrDetails<T> >::iterator p;
+    do {
+        // Scan refContainer looking for unreferenced pointers.
+        for (p = refContainer.begin(); p != refContainer.end(); p++) {
+            if (p->refcount > 0) {
+                continue;
+            }
+            memfreed = true;
+            if (p->memPtr) {
+                if (p->isArray) {
+                    delete[] p->memPtr;
+                } else {
+                    delete p->memPtr;
+                }
+            }
+            break;
+        }  
+    }
+    while (p != refContainer.end());
+    return memfreed;
+    //return false;
 }
 
 // Overload assignment of pointer to Pointer.
@@ -152,6 +195,7 @@ Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
+    typename std::list<PtrDetails<T> >::iterator p;
 
 }
 
