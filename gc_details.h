@@ -19,13 +19,17 @@ array, then arraySize contains its size */
     // the size of the array.
 
     //PtrDetails(void) {
-    PtrDetails(T *ptr, int size = 0) {
+    PtrDetails(T * ptr, unsigned size = 0) {
         // TODO: Implement PtrDetails
+        refcount = 1;
         memPtr = ptr;
-        if (size > 0) {
-            arraySize = size;
-            isArray = true;
-        }
+        isArray = (size > 0);
+        arraySize = size;
+        // memPtr = ptr;
+        // if (size > 0) {
+        //     arraySize = size;
+        //     isArray = true;
+        // }
         
     }
 };
@@ -36,11 +40,12 @@ bool operator==(const PtrDetails<T> &ob1,
                 const PtrDetails<T> &ob2)
 {
     // TODO: Implement operator==
-    if (ob1.memPtr == ob2.memPtr && ob1.arraySize == ob2.arraySize && ob1.isArray == ob2.isArray)
-    {
-        return true;
-    } else {
-        return false;
-    }
+    return (ob1.memPtr == ob2.memPtr);
+    // if (ob1.memPtr == ob2.memPtr && ob1.arraySize == ob2.arraySize && ob1.isArray == ob2.isArray)
+    // {
+    //     return true;
+    // } else {
+    //     return false;
+    // }
     
 }
