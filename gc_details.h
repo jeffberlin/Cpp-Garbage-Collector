@@ -18,18 +18,12 @@ array, then arraySize contains its size */
     // If this is an array, then size specifies
     // the size of the array.
 
-    //PtrDetails(void) {
     PtrDetails(T * ptr, unsigned size = 0) {
         // TODO: Implement PtrDetails
         refcount = 1;
         memPtr = ptr;
         isArray = (size > 0);
         arraySize = size;
-        // memPtr = ptr;
-        // if (size > 0) {
-        //     arraySize = size;
-        //     isArray = true;
-        // }
         
     }
 };
@@ -41,11 +35,5 @@ bool operator==(const PtrDetails<T> &ob1,
 {
     // TODO: Implement operator==
     return (ob1.memPtr == ob2.memPtr);
-    // if (ob1.memPtr == ob2.memPtr && ob1.arraySize == ob2.arraySize && ob1.isArray == ob2.isArray)
-    // {
-    //     return true;
-    // } else {
-    //     return false;
-    // }
     
 }
