@@ -108,18 +108,10 @@ Pointer<T,size>::Pointer(T *t){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
+    PtrDetails<T> newPtr(t, 0);
+    refContainer.push_back(newPtr);
     addr = t;
-    isArray = (size > 0);
-    arraySize = size;
-    refContainer.push_back(PtrDetails<T>(t, size));
-    // if (size > 0) {
-    //     arraySize = size;
-    //     isArray = true;
-    // }
-    
-    // PtrDetails<T> p = PtrDetails<T>(addr, arraySize)
-    // p.refcount++;
-    // refContainer.push_back(p);
+    isArray = false;
 
 }
 
@@ -131,14 +123,17 @@ Pointer<T,size>::Pointer(const Pointer &ob){
     // Lab: Smart Pointer Project Lab
     typename std::list<PtrDetails<T> >::iterator p;
     p = findPtrInfo(ob.addr);
+    addr = p->memPtr;
     p->refcount++;
-    addr = ob.addr;
-    arraySize = ob.arraySize;
-    isArray = (arraySize > 0);
-    // if (ob.isArray)
-    // {
-    //     p->isArray = true;
-    // }
+
+    if (p->isArray)
+    {
+        isArray = true;
+        arraySize = p->arraySize;
+    } else {
+        isArray = false;
+    }
+    
 }
 
 // Destructor for Pointer.
@@ -147,10 +142,10 @@ Pointer<T, size>::~Pointer(){
     
     // TODO: Implement Pointer destructor
     // Lab: New and Delete Project Lab
-    typename std::list<PtrDetails<T> >::iterator pd;
-    pd = findPtrInfo(addr);
-    if (pd->refcount) {
-        pd->refcount--;
+    typename std::list<PtrDetails<T> >::iterator p;
+    p = findPtrInfo(addr);
+    if (p->refcount > 0)  {
+        p->refcount--;
     }
     collect();
 }
@@ -164,27 +159,26 @@ bool Pointer<T, size>::collect(){
     // LAB: New and Delete Project Lab
     // Note: collect() will be called in the destructor
     bool memfreed = false;
-    typename std::list<PtrDetails<T> >::iterator pd;
+    typename std::list<PtrDetails<T> >::iterator p;
     do {
         // Scan refContainer looking for unreferenced pointers.
-        for (pd = refContainer.begin(); pd != refContainer.end(); pd++) {
-            if (pd->refcount > 0) {
+        for (p = refContainer.begin(); p != refContainer.end(); p++) {
+            if (p->refcount > 0) {
                 continue;
             }
             memfreed = true;
-            refContainer.remove(*pd);
+            refContainer.remove(*p);
 
-            if (pd->memPtr) {
-                if (pd->isArray) {
-                    delete[] pd->memPtr;
-                } else {
-                    delete pd->memPtr;
-                }
-            }
+            if (p->isArray)
+            {
+                delete[] p->memPtr;
+            } else {
+                delete p->memPtr;
+            } 
             break;
         }  
     }
-    while (pd != refContainer.end());
+    while (p != refContainer.end());
     return memfreed;
     //return false;
 }
@@ -195,30 +189,34 @@ T *Pointer<T, size>::operator=(T *t){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
-    typename std::list<PtrDetails<T> >::iterator pd;
-    pd = findPtrInfo(addr);
-    pd->refcount--;
+    PtrDetails<T> newPtr(t, 0);
+    refContainer.push_back(newPtr);
 
-    const Pointer<T, size> rv = Pointer<T, size>(t);
-    pd = findPtrInfo(rv.addr);
-    pd->refcount++;
-    addr = rv.addr;
+    addr = t;
+    isArray = false;
     return t;
 
 }
 // Overload assignment of Pointer to Pointer.
 template <class T, int size>
-Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
+Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv) {
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
-    typename std::list<PtrDetails<T> >::iterator pd;
-    pd = findPtrInfo(addr);
-    pd->refcount--;
-    pd = findPtrInfo(rv.addr);
-    pd->refcount++;
-    addr = rv.addr;
-    return rv;
+    typename std::list<PtrDetails<T> >::iterator p;
+    p = findPtrInfo(addr);
+    p->refcount--;
+    p = findPtrInfo(rv.addr);
+    p->refcount++;
+    addr = p->memPtr;
+    if (p->isArray) {
+        isArray = true;
+        arraySize = p->arraySize;
+    } else {
+        isArray = false;
+    }
+    
+    return *this;
 
 }
 
